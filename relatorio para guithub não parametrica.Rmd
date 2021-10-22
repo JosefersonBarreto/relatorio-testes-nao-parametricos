@@ -1,0 +1,1601 @@
+---
+title: "![](http://www.mktdeafiliados.com.br/wp-content/uploads/2014/08/analytics-blog.png){width=100%}"
+author: "Joseferson Da  Silva Barreto"
+date: "14/09/2021"
+output:
+  html_document:
+    #css: styles.css
+    #css: bootstrap.min (1).css
+   css: bootstrap.min (3).css
+---
+
+# Objetivo
+
+Objetivo é executar alguns testes afim de identificar relações entre a variável  de interesse e as variáveis observadas (independentes) com o intuito de verificar quais dessas variáveis independentes são fatores para apreciação das musicas no Spotify ,para isso foi utilizado um banco de dados "**data.csv**" contendo 14 variáveis com 195 observações , que possui informações sobre a recomendação de músicas no Spotify. Para esse análise  foi utilizado exclusivamente o software  Rstudio/Markdown .
+
+# Carregando os pacotes
+
+Primeiramente vamos carregar os pacotes que serão utilizados para executar as devidas análises em nosso banco de dados
+
+```{r,message=FALSE}
+library(dplyr)
+library(car)
+library(plotly)
+library(rstatix)
+library(gplots)
+library(corrplot)
+require(MASS)
+require(dplyr)
+library(gplots)
+require(MASS)
+require(dplyr)
+library(corrplot)
+library(gmodels)
+ library(ggpubr)
+library(tidyverse)
+library(gridExtra)
+library(gt)
+library(tidyverse)
+library(gridExtra)
+require(knitr)
+library(questionr)
+```
+
+## Escolhendo o diretório de trabalho
+
+Antes de chamar nosso banco de dados , vamos utilzar a função "**setwd()**" para especificar o nosso diretório de trabalho
+
+```{r}
+setwd("E:/document/OneDrive/Documentos")
+```
+
+## Chamando o banco de dados
+
+Como o nosso banco de dados está no formato **.csv** utilizaremos a função "**read.csv**" para consiguir abrir o nosso banco de dados , entretanto , para que o banco rode corrretamente temos que identificar o modo em que as variáveis estão separadas no nosso banco de dados . No nosso casso, as variáveis estão separados por apenas "virgula",logo, utilizaremos a função "**sep=","**" para ler corretamente nosso banco de dados
+
+```{r}
+    dados<-read.csv("C:/Users/josef/Documents/data.csv",header = T, sep = ",")
+ View(dados)
+```
+
+## Observando os tipos das variáveis
+
+Para observar os tipos das variáveis presentes em nosso banco de dados ,utilizaremos a função "**str()**"
+
+```{r}
+    str(dados)
+```
+
+Temos variáveis do tipo númericas e variáveis do tipo inteiras no nosso banco de dados.
+
+# Descrição das variáveis
+
+  vamos falar um pouco sobre cada tipo das variáveis ,além de plotar  um gráfico afim de nos auxiliar nas análise ,  em alguns  casos fui adicionado a curva  da normalidade (distribuição normal),com o propósito de identificar visualmente um comportamento de normalidade dos dados ou não .
+  
+  
+  
+  
+## Danceability(dançabilidade)
+
+A capacidade de dança descreve como uma faixa é adequada para dançar com base em uma combinação de elementos musicais, incluindo tempo, estabilidade do ritmo, força da batida e regularidade geral. Um valor de 0,0 é menos dançável e 1,0 é mais dançante. Tipo da variável : númerica /continua .
+
+```{r}
+
+
+s4<-dados$danceability
+
+
+f1<- qplot(s4,
+        main = "Histograma daçabilidade",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("Navy blue"),
+        col=I("red"),
+      fill="green", 
+        alpha= .9) + 
+    geom_density(col=2)+ theme(legend.position="none")
+  ggplotly(f1)     
+```
+
+## Energy(energia)
+
+Energia é uma medida de 0,0 a 1,0 e representa uma medida perceptual de intensidade e atividade. Normalmente, as faixas energéticas parecem rápidas, altas e barulhentas. Por exemplo, death metal tem alta energia, enquanto um prelúdio de Bach tem pontuação baixa na escala. As características perceptivas que contribuem para este atributo incluem faixa dinâmica, intensidade percebida, timbre, taxa de início e entropia geral.
+
+Tipo da variável : númerica,contínua .
+
+```{r}
+
+
+ss<-dados$energy
+
+
+
+ f2<- qplot(dados$energy,
+        main = "Histogram energy",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("orange"),
+        col=I("black")  ,
+          col="red", 
+        fill="green", 
+        alpha= .9) + 
+    geom_density(col=2)+ theme(legend.position="none")
+ 
+ ggplotly(f2)
+```
+
+## Key(chave)
+
+A **chave(key)** em que a trilha está. Os inteiros mapeiam os tons usando a notação padrão de classe de tom. Por exemplo, 0 = C(dó), 1 = C♯(dó sustenido) / D ♭(ré bemol), 2 = D(ré) e assim por diante.
+
+Tipo da variável : númerica /inteira
+
+```{r}
+
+
+ss<-dados$key
+
+
+
+ f3<- qplot(dados$key,
+        main = "Histogram key",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("green"),
+        col=I("black")  ,
+          col="blue", 
+        fill="blue", 
+        alpha= .4,ylim=c(0,20),xlim = c(0,10)) + 
+    geom_density(col=2)+ theme(legend.position="none")
+ 
+ ggplotly(f3)
+```
+
+## Loudness(volume)
+
+O volume geral de uma faixa em decibéis (dB). Os valores de sonoridade são calculados em toda a trilha e são úteis para comparar a sonoridade relativa das trilhas. Loudness é a qualidade de um som que é o principal correlato psicológico da força física (amplitude). Os valores típicos variam entre -60 e 0 db.
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+
+
+ f4<- qplot(dados$loudness,
+        main = "Histogram loudness",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("blue"),
+        col=I("black")  ,
+          col="blue", 
+        fill="red", 
+        alpha= .4,ylim=c(0,10),xlim = c(-60,0)) + 
+    geom_density(col=2)+ theme(legend.position="none")
+
+  ggplotly(f4)
+```
+
+## mode(modo)
+
+Modo indica a modalidade (maior ou menor) de uma faixa, o tipo de escala da qual seu conteúdo melódico é derivado. Maior é representado por 1 e menor é 0.
+
+Tipo da variável : númerica/ inteira
+
+```{r}
+f5<-ggplot(dados,aes(dados$mode)) +geom_bar(
+fill="gold")+  theme_dark()  + 
+  labs(title = "gráfico para variável mode",
+       x="mode", y=" frequencia") 
+
+ggplotly(f5)
+```
+
+## speechiness(discurso)
+
+A fala detecta a presença de palavras faladas em uma faixa.
+
+Tipo de variável : númerica/contínua
+
+```{r}
+  f6<-qplot(dados$speechiness,
+        main = "Histogram speechiness",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("green"),
+        col=I("black")  ,
+          col="blue", 
+        fill="red", 
+        alpha= .4,xlim = c(0,1)) + theme_dark() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+    ggplotly(f6)
+```
+
+## acousticness(acústico)
+
+Uma medida de confiança de 0,0 a 1,0 para saber se a faixa é acústica. 1.0 representa alta confiança de que a faixa é acústica.
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+ f7<- qplot(dados$acousticness,
+        main = "Histogram acousticness",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("blue"),
+        col=I("black")  ,
+          col="blue", 
+        fill="red", 
+        alpha= .4,ylim=c(0,12),xlim = c(0,1)) + theme_dark() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+ ggplotly(f7)
+```
+
+## instrumentalness(instrumentalidade)
+
+Prevê se uma faixa não contém vocais. Os sons "Ooh" e "aah" são tratados como instrumentais neste contexto.
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+  f8<-qplot(dados$instrumentalness,
+        main = "Histograma instrumentalidade ",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("Navy blue"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .5,ylim=c(0,15),xlim = c(0,1)) + theme_dark() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+ggplotly(f8)
+```
+
+## liveness(vivacidade)
+
+Detecta a presença de um público na gravação.
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+ l <-qplot(dados$liveness,
+      main = "Histograma liveness ",
+      xlab = "valores",
+      ylab = "frequencias",
+      fill=I("purple"),
+      col=I("black")  ,
+      col="red", 
+      fill="red", 
+      alpha= .5,ylim=c(0,15),xlim = c(0,1)) + theme_dark() +
+  geom_density(col=2)+ theme(legend.position="none")
+
+
+ggplotly(l)
+
+```
+
+## valence(valência)
+
+Uma medida de 0,0 a 1,0 que descreve a positividade musical transmitida por uma faixa.
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+  f10<-qplot(dados$valence,
+        main = "Histograma valence ",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("Turquoise"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .5,ylim=c(0,15),xlim = c(0,1)) + theme_dark() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+ggplotly(f10) 
+```
+
+## tempo(tempo)
+
+O tempo estimado geral de uma faixa em batidas por minuto (BPM)
+
+Tipo da variável : númerica/ contínua
+
+```{r}
+ lk<- ggplot(data=dados, aes(dados$tempo)) + 
+    labs(title = "histograma tempo", x="valores",y= "frequencia")+
+    theme_dark() +
+   geom_histogram(breaks=seq(60,180, by=4), 
+                  col="red", 
+                  aes(fill=..count..)) +
+   geom_density(col=2) +
+   scale_fill_gradient("Count", low="green", high="red") 
+ 
+ 
+ 
+ ggplotly(lk)
+```
+
+## duration_ms(duração_ms)
+
+A duração da faixa em milissegundos
+
+Tipo da variável : númerica/ inteira
+
+```{r}
+options(scipen=999)
+  f11 <-qplot(dados$duration_ms,
+        main = "Histograma duration_ms ",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("Violet"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .5,ylim=c(0,15),xlim = c(70200,666000)+geom_count(alpha=0.5)) + theme_dark() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+ggplotly(f11)
+```
+
+### Observação
+
+Talvez seja interessante transformar essa variável , pois cada minuto temos 60.000 milesegundos .
+
+## time_signature(tempo_compasso )
+
+Uma estimativa de fórmula de compasso geral de uma faixa.
+
+Tipo da variável : númerica/ inteira
+
+```{r}
+
+
+si<-dados$time_signature
+
+
+
+f12<-qplot(si,
+        main = "Histogram time_signature",
+        xlab = "valores",
+        ylab = "frequencias",
+        fill=I("blue"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .5) + theme_replace() +
+    geom_density(col=2)+ theme(legend.position="none")
+
+ ggplotly(f12)
+```
+
+## liked(apreciadas)
+
+Essa é a nossa variável de interesse, onde\
+1 para músicas favoritas, 0 para músicas não gostadas
+
+```{r}
+f5<-ggplot(dados,aes(dados$liked)) +geom_bar(
+fill="steelblue1")+  theme_dark()  + 
+  labs(title = "gráfico para variável liked",
+       x="liked", y=" frequencia") 
+
+ggplotly(f5)
+```
+
+## observação importante
+
+Em nosso banco de dados a variável **liked** está como númerica/inteira , mas na verdade ela é uma variável do tipo categorica .
+
+# Testes Indicados
+
+para nossos tipos de variáveis os teste mais indicados são os **testes T independente** e o **teste de Wilcoxon** .
+
+# Pequena Introdução aos Testes a Serem Utilizados
+
+## Teste T
+
+O teste t de Studente (ou simplesmente teste t) compara duas médias e mostra se as diferenças entre essas médias são significativas. Em outras palavras, permite que você avalie se essas diferenças ocorreram por um mero por acaso ou não. A necessidade de determinar se duas médias de amostras são diferentes entre si é uma situação extremamente frequente em pesquisas científicas.
+
+Por exemplo se um grupo experimental difere de um grupo controle, se uma amostra difere da população, se um grupo difere antes de depois de um procedimento. Nessas diversas situações, um método bastante comum é a comparação das médias da medida de interesse.
+
+Os tipos de teste T são : **teste T para uma amostra,teste T Independente e o teste T pareado** .
+
+## Teste de Wilcoxon
+
+O teste Wilcoxon de amostras pareadas (também conhecido como teste de postos sinalizados de Wilcoxon) é uma alternativa não paramétrica ao teste t pareado usado para comparar dados pareados. É usado quando seus dados não são normalmente distribuídos.
+
+Desenvolvido por F. Wilcoxon em 1945, o teste de Wilcoxon pareado baseia-se nos postos das diferenças intrapares. Este teste não-paramétrico, usado para comparar amostras relacionadas, é uma alternativa para o teste t-Student quando as amostras não seguem distribuição normal.Portanto, o teste de Wilcoxon é usado para testar se as medianas das amostras são iguais nos casos em que a suposição de normalidade não é satisfeita ou quando não for possível checar essa suposição.
+
+##  Teste da soma de postos de wilcoxon para duas amostras independentes
+
+
+ A base do processo utilizado no teste de postos de wilcoxon é o principio de que, se duas
+amostras são extraídas de populações idênticas e os escores são dispostos em uma sequência
+única, combinada, de valores, então os postos altos e os postos baixos devem situar-se
+justamente entre duas amostras.
+  Se os postos baixos predominam em uma amostra, e os postos altos predominam na outra,
+então suspeitamos que as populações não sejam idêntica
+
+
+Suposições:
+1. temos duas amostras independentes.
+2. estamos testando a hipótese nula, de que as duas amostras independentes provem da mesma
+distribuição; a hipótese alternativa é a afirmação de que as duas distribuições apresentem
+alguma diferença.
+3. cada uma das duas amostras tem mais de 10 escores, ou valores.
+  Não exige que as populações sejam distribuídas normalmente .
+
+ Nesse relatório será utilizado o teste de Wilcoxon-Mann-Whitney. 
+
+# danceability(daçabilidade) e liked(apreciadas)
+
+# Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+```{r}
+
+
+boxplot (dados$danceability ~ dados$liked,
+        main = "Boxplot para  dançabilidade e prefiridas ",
+        xlab = "danceability",
+        ylab = "liked",
+        las = 1,
+        col = c ("violetred", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$danceability ,dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+Com base nas estatísticas descritivas percebe-se que a mediana da variável liked é maior que a mediana da variável daçabilidade , mas por qual motivo isso acontece? bom, vale lembrar que a variável liked está entre os números inteiro de 0 a 1 , em quanto os valores está nos números racionais entre 0 e 1 por isso que a mediana de **liked** foi maior,entrentanto , não é concretizado que as duas tenha associação , para fazer a verificação vamos utilizar os seguintes testes :
+
+
+
+
+## montando a tabela das medianas da variável dançabilidade 
+
+```{r}
+
+l<-dados%>% group_by(liked) %>%
+  get_summary_stats(danceability, type="common")
+
+
+l %>%
+  gt()%>%
+  tab_header(
+    title = md("**Medianas danceability por grupos**"))
+```
+
+
+## montando a tabela com as frequências
+```{r}
+library(dplyr)
+dados<- dados %>% arrange(dados$danceability)
+#View(dados)
+
+#data3 <- data[rowSums(is.na(dados2) == 0, ] 
+danc0<- rep("0.130-0.705",98)
+danc1<- rep("0.706-0.946",97)
+
+danc0<-as.matrix(danc0, ncol=1)
+danc1<-as.matrix(danc1, ncol=1)
+
+
+
+dancy<-rbind(danc0,danc1)
+
+library(dplyr)
+
+
+dados$dancy<-dancy
+ 
+
+ library(questionr)
+
+ 
+ #str(dados$dancy) 
+
+ library(knitr)
+
+ library(shiny)
+ library(gt)
+ library(gmodels)
+ 
+CrossTable(dados$dancy,dados$liked, 
+            expected = F, prop.r = F, prop.c = F, prop.t = T, prop.chisq = F, format = "SPSS")
+```
+  Como podemos observar na tabelas de frequencia  36.92 %  aproximadamente dos usuários(observações) presentes em nosso banco de dados, preferem músicas onde a dancabilidade está na faixa entre 0.706-0.946 , além disso , 35.897%  dos usuários não gostam de músicas onde a dançabilidade está entre 0.130-0.705.  Com isso, quanto maior a dançabilidade, mais os usuários gostam das musicas e quanto menor a dançabilidade ,ps usuários gostam menos das músicas.  
+
+# Teste de Presupostos
+
+Vamos testar a normalidade das variáveis para a aplicação dos testes indicados
+
+# Executantando o teste Shapiro Wilk
+
+Vamos testar as normalidades das variáveis através do teste shapiro wilk , caso não haja normalidade entre as variáveis devemos utilizar o teste Wilcoxon, para executar o teste Shapiro Wilk vamos utilizar o comando "**shapiro.test()**"
+
+## hipóteses do teste Shapiro Wilk
+
+**h0** $=$ distribuição dos dados $=$ normal , para Pvalor $>$ 0,05
+
+**h1**$=$ distribuição dos dados $\neq$ normal , para pvalor $\le$ 0,05
+
+```{r}
+#options(scipen = 999)
+
+dados$diferenaliked<-dados$liked-dados$danceability
+shapiro.test(dados$diferenaliked)
+
+
+```
+
+Como o Pvalor $<$ 0,05 ,rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+
+
+## Teste Wilcoxon para as variáveis liked e dancabilidade
+
+para executar o testde de wilcoxon vamos chamar a função "**wilcox.test**" em relação ao nosso banco de dados "**dados**" unsando a correção"**correct**"
+
+```{r}
+wilcox.test(dados$danceability~dados$liked, data=dados,correct=T)
+```
+
+### Hipóteses do teste Wilcoxon
+
+**h0** $=$ Mediana das diferênças $=$ 0 , para Pvalor $>$ 0,05
+
+**h1**$=$ mediana dos diferênças $\neq$ 0 , para pvalor $\le$ 0,05
+
+### <font color='red'>Observação </font>  
+ Como estamos comparando dois grupos   de medianas , ou seja , grupo A e grupo  B   , quando a mediana das diferênças forem iguais a 0 isso significa que  a mediana do grupo A $=$  mediana do grupo B  e quando  a mediana das diferenças forem diferente de 0 isso significa que a mediana do grupoA $\neq$ mediana do grupo B.
+
+## Prosseguindo com a  interpretação do resultado do teste 
+
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo , a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, podemos afirmar que existe associação significativa entre as variáveis .
+
+Desse modo , existe relação entre as variáveis "**danceability**" e "**liked**".
+
+# Intrumentalidade e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+### Tabela das medianas
+
+```{r}
+
+c<-dados%>% group_by(liked) %>%
+  get_summary_stats(instrumentalness, type="median_iqr")
+
+
+c %>%
+  gt()%>%
+  tab_header(
+    title = md("**Medianas instrumentalness por grupos**"))
+
+#knitr::kable(c ,caption = "*Medianas instrumentalness por grupos*")
+```
+
+Como podemos observar a diferêça das medianas das duas vareáveis deu diferente de zero , entretanto não podedos afirmar se existe relação entre as variáveis .
+
+
+
+### plotando o gráfico 
+
+```{r}
+
+
+library(tidyverse)
+library(gridExtra)
+
+
+boxplot (dados$instrumentalness ~ dados$liked,
+        main = "Boxplot para  instrumentalidade e prefiridas ",
+        xlab = "liked",
+        ylab = "instrumentalidade",
+        las = 1,
+        col = c ("palegoldenrod", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+
+
+meanval <- by(dados$danceability ,dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+Analisando pelo gráfico de boxplot é perceptível que existe uma leve diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **instrumentalness(instrummentalidade)** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes:
+
+## Testando a normalidade para instrumentalismo e liked
+
+```{r}
+
+dados$diferenalike<-dados$instrumentalness-dados$liked
+shapiro.test(dados$diferenalike)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+
+# Teste Wilcoxon para instrumentalness e liked
+
+```{r}
+#wilcox.test(dados$liked,dados$instrumentalness,paired = TRUE)
+
+wilcox.test(dados$instrumentalness~dados$liked, data=dados,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo , a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, podemos afirmar que existe associação significativa entre as variáveis .
+
+# bônus
+
+## E se tentarmos pelo teste Qui-quadrado ?
+
+### Teste Qui-quadrado
+
+O teste Qui-quadrado é um teste não-paramétrico utilizado, basicamente, para três finalidades específicas, que são:
+
+(1) Verificar as distribuições de probabilidades de cada categoria de uma variável em relação a um valor teórico esperado (aderência),
+
+(2) Verificar se as distribuições das categorias são as mesmas para diferentes subpopulações de interesse (homogeneidade)
+
+(3) Verificar se duas variáveis categóricas são independentes (independência).
+
+Apesar das diferenças em relação às perguntas de pesquisa, o sistema matemático é o mesmo.
+
+# Hipóteses
+
+**h0** $=$ não há asociação entre as vareiáveis instrumentalness e liked , para Pvalor $>$ 0,05
+
+**h1**$=$ há asociação entre as vareiáveis instrumentalness e liked, para pvalor $\le$ 0,05
+
+Antes temos que transformar a varíavel instrumentalness em intervalo :
+
+```{r}
+
+dados1<-data.frame(dados$liked,dados$instrumentalness)
+
+dados1<- dados1 %>% arrange(dados1$dados.instrumentalness)
+view(dados1)
+
+
+
+#considerando   o intervalo de    0-0.00000405  = fr baixa 
+# e considerando o  intervalo  de  0.00000406-0.96900000  como  fr alta 
+ #fr=frequencia 
+
+int3<-rep("fr baixa",94)
+
+
+
+int4<- rep("fr alta",101)
+int3<-as.matrix(int3, ncol=1)
+int4<-as.matrix(int4, ncol=1)
+
+instru2<-rbind(int3,int4)
+## adicionando a  variável ao nosso banco de dados 
+dados1$instru2<-instru2
+```
+
+Agora vamos tranformar a variável liked
+
+```{r}
+
+dados1<- dados1 %>% arrange(dados1$dados.liked)
+
+
+view(dados1)
+
+
+liked01<-rep("não gostadas",95)
+liked1<-rep("gostadas",100)
+
+liked01<-as.matrix(liked01, ncol=1)
+liked1<-as.matrix(liked1, ncol=1)
+
+like<-rbind(liked01,liked1)
+
+## adicionando a  variável ao nosso banco de dados 
+dados1$like<-like
+
+```
+
+## Organizando os fatores
+
+Organizar os fatores é importante para que quandos nos plotarmos o gráfico os valores saiam na ordem desejada
+
+```{r}
+
+dados1$instru2 <- factor(dados1$instru2, 
+                       levels = c("fr baixa", "fr alta"))
+
+dados1$like <- factor(dados1$like, 
+                         levels = c("não gostadas", "gostadas"))
+
+```
+
+## executando o teste qui-quadrado para instrumentalidade e gostava(liked)
+
+```{r}
+
+chisq.test(dados1$instru2,dados1$like)
+```
+
+Podemos perceber que o valor de ambos os testes após a transformação da variável que representa a instrumentalidade deu o mesmo valor , logo , existe relação entre as variáveis "**instrumentalness**" e "**liked**"
+
+## Visualizando o gráfico
+
+```{r}
+# Balloon plot
+
+teste<-table(dados1$like,dados1$instru2)
+library(gplots)
+
+balloonplot(t(teste), 
+            main = "gráfico de associação", xlab = "","" ,ylab = "", label = T, show.margins = T)
+```
+
+Podemos perceber que 81 das pessoas do total de 195 gostam de musicas com menos intrumentalidade ,além disso , 82 pessoas não gostam das músicas com mais intrumentalidade
+
+## Também podemos observar pelos resíduos do Qui-quadrado
+
+```{r}
+
+chisq_tes <- chisq.test(dados1$like,dados1$instru2)
+chisq_tes
+
+library(corrplot)
+
+corrplot(chisq_tes$residuals, is.cor = FALSE)
+```
+
+Pode-se observar no gráfico que , as pessoas preferem as musicas que tem menos intrumentalidade ,logo , curtem musicas com menores quantidades de vocais
+
+## Podemos observar as porcentagens desses valores ?
+
+Sim , para isso usaremos a função "**CrossTable()**" do pacote "**gmodels**". Essa função irá calcular o qui-quadrado os residuos e nos mostrará uma tabela de frequência onde terá as porcentagens
+
+**Observação**
+
+Quamdo não é possél executar o qui-quadrado , a função com os seguintes argumentos a baixo executa o teste exato de fisher
+
+# Introdução ao teste de fisher
+
+O Teste Exato de Fisher é utilizado em tabelas de contingência 2x2 para comparar 2 grupos de duas amostras independentes, em outras palavras, tem como objetivo testar se a variável da linha e a variável da coluna são independentes.
+
+# Seguindo com nossa análise
+
+Agora vamos executar o camando "**CrossTable()**" com os seguintes argumentos a baixo para obtermos oque desejavamos :
+
+```{r}
+ library(gmodels)
+
+CrossTable(dados1$like,dados1$instru2, 
+           expected = T, prop.r = F, prop.c = F, prop.t = T, prop.chisq = F, 
+           chisq = T, fisher = T,
+           format = "SPSS")
+
+```
+
+Como podemos ver esse comando nos dá várias informações como : resultado do teste qui-quadrado, tabela de frequências ,porcentagens , o valor da estatística dos testes e seus graus de liberdade,entre outras .
+
+Pode-se observar que cerca de 42.051% não gostava de musicas com muita intrumentalidade e outros 41.538% gostava(gosta) de musicas com menos instrumentalidade além disso , segundo os resultados , apenas 9,74 % dos usuários que estão em nossa observação gostava de musicas com mais intrumentalidade .
+
+# Valence e liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+## tabela das medianas valence(valencia)
+
+```{r}
+
+c<- dados%>% group_by(liked) %>%
+  get_summary_stats(valence, type="median_iqr")
+
+c%>%
+gt()%>%
+  tab_header(
+    title = md("**Medianas valence por grupos**")
+    )
+```
+
+
+## Plotando o gráfico
+
+```{r}
+library(gridExtra)
+
+
+boxplot (dados$valence ~ dados$liked,
+        main = "Boxplot para  valence e liked(preferidas) ",
+        xlab = "valence",
+        ylab = "liked",
+        las = 1,
+        col = c ("light green", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$valence , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+ 
+ 
+```
+
+Analisando pelo gráfico de boxplot é perceptível que existe uma leve diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **valence** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes:
+
+## Teste de normalidade para as variáveis valence e liked
+
+Como valence é referente a positividade passada em uma faixa , ou seja, em uma música , vamos ver se tem relação com o liked
+
+```{r}
+dados$vals<-dados$liked-dados$valence
+shapiro.test(dados$vals)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+# Teste de Wilcoxon para valence e liked
+
+```{r}
+
+wilcox.test(dados$valence~dados$liked, data=dados,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo , a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, podemos afirmar que existe associação significativa entre as variáveis .
+
+# acousticness(acústico) e liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+## tabela das medianas 
+
+```{r}
+
+c<- dados%>% group_by(liked) %>%
+  get_summary_stats(acousticness, type="median_iqr")
+
+c%>%
+gt()%>%
+  tab_header(
+    title = md("**Medianas acousticness por grupos**")
+    )
+```
+
+## plotando o gráfico boxplot
+
+```{r}
+library(gridExtra)
+
+
+
+boxplot (dados$acousticness ~ dados$liked,
+        main = "Boxplot para  acousticness e prefiridas ",
+        xlab = "acousticness",
+        ylab = "liked",
+        las = 1,
+        col = c ("orange", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$acousticness, dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+ 
+ 
+```
+
+Analisando pelo gráfico de boxplot e a tabela  é perceptível que as medianas estão bem próximas ,mas será que não existe relação significatva enter elas? para isso , vamos executar os seguintes testes:
+
+## Testando a normalidade entre as variáveis acousticness e liked
+
+```{r}
+dados$acoust<-dados$liked-dados$acousticness
+shapiro.test(dados$acoust)
+
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+# Teste de Wilcoxon para as variáveis liked e acousticness
+
+```{r}
+wilcox.test(dados$acousticness~dados$liked, data=dados,correct=T)
+```
+
+Como o Pvalor $>$ 0,05, não rejeita-se a hipótese nula ,logo , a médiana da diferênça dos valores é realmente igual a zero , nesse caso, podemos afirmar que **não** existe associação significativa entre as variáveis .
+
+# energy e liked
+
+## testando a normalidade das variáveis energy e liked
+
+```{r}
+dados$ener<-dados$liked-dados$energy
+shapiro.test(dados$ener)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon pra as variáveis energy e liked
+
+```{r}
+wilcox.test(dados$energy~dados$liked, data=dados,correct=T)
+```
+
+como o Pvalor $>$ 0,05, não rejeita-se a hipótese nula ,logo , a médiana da diferênça dos valores é realmente igual a zero . Nesse caso, **não** existe associação significativa entre as variáveis
+
+## analisando
+
+```{r}
+
+k<-dados%>% group_by(liked) %>%
+  get_summary_stats(energy, type="median_iqr")
+
+k %>%
+  gt()%>%
+  tab_header(
+   title = md("**Medianas Energy por grupos**"))
+  
+```
+
+```{r}
+#require(knitr)
+#knitr::kable(k ,caption = "**Medianas Energy por grupos**")
+```
+
+## plotando o boxplot
+
+```{r}
+
+
+boxplot (dados$energy ~ dados$liked,
+        main = "Boxplot para  energy e liked ",
+        xlab = "energy",
+        ylab = "liked",
+        las = 1,
+        col = c (" salmon1", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$energy , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+ 
+ 
+
+
+
+
+
+```
+
+Analisando pela tabela e pelo gráfico de boxplot é perceptível que existe uma leve diferença entre as médianas ,embora haja diferença entre as medianas, a variável Energy(energia) não seja um fator determinante para apreciação .
+
+# liked e loudness(sonoridade)
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+## tabela das medianas (sonoridade)
+
+
+```{r}
+  j<-dados%>% group_by(liked) %>%
+  get_summary_stats(loudness, type="median_iqr")
+
+
+j %>%
+  gt()%>%
+  tab_header(
+   title = md("**Medianas loudness por grupos**"))
+```
+
+
+## plotando o gráfico
+
+```{r}
+###### gráfico 
+boxplot (dados$loudness ~ dados$liked,
+        main = "Boxplot para  loudness e liked ",
+        xlab = "loudness",
+        ylab = "liked",
+        las = 1,
+        col = c (" red", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$loudness , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+Analisando pela tabela das medianas e  pelo gráfico de boxplot é perceptível que existe  diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **loudness** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes
+
+### Observação
+
+Pela quantidade de Outliers presente no boxplot , percebemos que o teste T independente não é o mais indicado para essa análise , mas por questões de didática vamos executar o teste de normalindade:
+
+## teste de normalidade para as variáveis liked e loudness(sonoridade)
+
+```{r}
+dados$loud<-dados$liked-dados$loudness
+shapiro.test(dados$loud)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## Teste de wilcoxon para sonoridade e liked
+
+```{r}
+wilcox.test(dados$loudness~dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo , a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, podemos afirmar que existe associação significativa entre as variaveis .
+
+# Speechiness(discurso) e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+
+## tabela das medianas por grupos speechiness(discurso)
+
+```{r}
+  jo<-dados%>% group_by(liked) %>%
+  get_summary_stats(speechiness, type="median_iqr")
+
+
+jo %>%
+  gt()%>%
+  tab_header(
+   title = md("**Medianas speechiness por grupos**"))
+```
+
+
+## Plotando o gráfico
+
+```{r}
+###### gráfico 
+boxplot (dados$speechiness ~ dados$liked,
+        main = "Boxplot para  speechiness e liked ",
+        xlab = "speechiness",
+        ylab = "liked",
+        las = 1,
+        col = c (" Khaki", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$speechiness , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+Analisando pela tabela e  pelo gráfico de boxplot é perceptível que existe uma diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **speechiness** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes
+
+### Observação
+
+Pela quantidade de Outliers presente no boxplot , percebemos que o teste T independente não é o mais indicado para essa análise , mas por questões de aprendizado vamos executar o teste de normalindade:
+
+## teste de normalidade para as variáveis liked e speechiness
+
+```{r}
+dados$spee<-dados$liked-dados$speechiness
+shapiro.test(dados$spee)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para speechiness e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$speechiness~dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo ,a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, existe associação significativa entre as variaveis .
+
+# Duration ms e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+## tabela das medianas por grupos Duration_ms(duração ms)
+
+```{r}
+  j1<-dados%>% group_by(liked) %>%
+  get_summary_stats(speechiness, type="median_iqr")
+
+
+j1 %>%
+  gt()%>%
+  tab_header(
+   title = md("**Medianas speechiness por grupos**"))
+```
+
+
+## Plotando o gráfico boxplot
+
+```{r}
+###### gráfico 
+boxplot (dados$duration_ms ~ dados$liked,
+        main = "Boxplot para  duration_ms e liked(apreciadas) ",
+        xlab = "duration_ms",
+        ylab = "liked",
+        las = 1,
+        col = c ("Green", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$duration_ms , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+Analisando pela tabela e pelo gráfico de boxplot é perceptível que existe uma diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **duration_ms** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes :
+
+### Observação
+
+Pela quantidade de Outliers presente no boxplot , percebemos que o teste T independente não é o mais indicado para essa análise , mas por questões de aprendizado vamos executar o teste de normalindade:
+
+## teste de normalidade para as variáveis liked e duration_ms
+
+```{r}
+dados$dura<-dados$liked-dados$duration_ms
+shapiro.test(dados$dura)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para duration_ms e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$duration_ms~dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo ,a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, existe associação significativa entre as variáveis .
+
+# mode e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+## Plotando o gráfico
+
+```{r}
+###### gráfico 
+boxplot (dados$mode ~ dados$liked,
+        main = "Boxplot para  mode e prefiridas ",
+        xlab = "mode",
+        ylab = "liked",
+        las = 1,
+        col = c (" Turquoise", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$mode , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+```
+
+a primeira vista pode parecer meio estranho esse gráfico , mas podemos perceber com facilidade que ambas medianas são iguais ,logo , não há associação entre a variável **mode** e **liked(apreciada)** .
+
+Com tudo , vamos prosseguir com o teste afim de provar que realmenete não existe associação entre as variáveis
+
+## verificando pela tabela das medianas mode(modo)
+
+```{r}
+g<- dados%>% group_by(liked) %>%
+  get_summary_stats(mode, type="median_iqr")
+
+g%>%
+gt()%>%
+  tab_header(
+    title = md("**Medianas mode por grupos**")
+    )
+   
+```
+
+podemos perceber pela tabela que a mediana da variável mode para 0(não gostadas) e para 1 (gostadas) são iguais , mas será que não teremos associação entre as variáveis ?
+
+Prosseguindo com os teste:
+
+## teste de normalidade para as variáveis liked e mode
+
+```{r}
+dados$mod<-dados$liked-dados$mode
+shapiro.test(dados$mod)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para mode e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$mode~dados$liked,correct=T)
+```
+
+Como o Pvalor $>$ 0,05, não rejeita-se a hipótese nula do teste de Wilcoxon ,logo ,a médiana da diferênça dos valores é realmente igual a zero . Nesse caso, **não** existe associação significativa entre as variáveis .
+
+# time_signature(tempo_campasso ) e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+## Plotando o gráfico  boxplot
+
+```{r}
+
+###### gráfico 
+boxplot (dados$time_signature ~ dados$liked,
+        main = "Boxplot para  time_signature e liked ",
+        xlab = "time_signature",
+        ylab = "liked",
+        las = 1,
+        col = c (" Turquoise", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$time_signature , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+
+
+
+
+```
+
+como a variável time_signature está bastante conecetrada em seus valores entre 4 , por isso que o boxplot ficou com essa aparência
+
+## mostrando as medianas em uma tabela
+
+```{r}
+ j<- dados%>% group_by(liked) %>%
+  get_summary_stats(time_signature, type="median_iqr")
+
+j%>%
+gt()%>%
+  tab_header(
+    title = md("**Medianas time_signature por grupos**")
+    )
+   
+```
+
+Pela tabela das medianas do grupos ,temos que os valores das medianas obtidos são iguais ,mas será que realmente não exista associação entre as viáveis ?
+
+## teste de normalidade para as variáveis liked e time_signature
+
+```{r}
+dados$sigo<-dados$liked-dados$time_signature
+shapiro.test(dados$sigo)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para time_signature e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$time_signature~dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo ,a médiana da diferênça dos valores é realmente diferente de zero , nesse caso, existe associação significativa entre as variáveis .
+
+## observação
+
+Mesmo as medianas da médiana sendo iguais , o teste de wilcoxon provou que existe a associação entre o tempo de compasso(**time_signature**) e apreciação(**liked**), isso acontece pelo motivo do teste de wilcoxon Mann-Whitney ser influenciado pelo formato da distribuição, ou seja , existe diferença entre as distribuições  .
+
+##vamos plotar os Histogramas dessas distribuições
+
+```{r}
+#par(mfrow=c(1,3))
+#hist(dados$time_signature[dados$liked == "0"],
+    # ylab="Frequência", xlab="Nota", main="Grupo Frente")
+library(ggplot2)
+library(gridExtra)
+plot1<-qplot(dados$time_signature[dados$liked == "0"],
+        main = "Histogram time_signature",
+        xlab = "não gostadas",
+        ylab = "frequencias",
+        fill=I("blue"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .4) + theme_replace() +
+    geom_density(col=2)+theme(legend.position="none")
+
+
+
+plot2<-qplot(dados$time_signature[dados$liked == "1"],
+        main = "Histogram time_signature",
+        xlab = "gostadas",
+        ylab = "frequencias",
+        fill=I("blue"),
+        col=I("black")  ,
+          col="red", 
+        fill="red", 
+        alpha= .4) + theme_dark() +
+    geom_density(col=6)+ theme(legend.position="none")
+
+grid.arrange(plot1, plot2, ncol=1, nrow = 2)
+
+
+```
+ Pode-se  perceber  que realmente existe diferça entre as duas distribuições .
+ 
+# E se a gente transformar a variável time_signature em intervalo?
+
+vamos ver se tranformando a variável **time_signature** em intervalo os valores das medianas iram mudar :
+
+```{r}
+
+dados<- dados %>% arrange(dados$time_signature)
+#view(dados)
+time1<-rep("1-3",19)
+time2<-rep("4-5",176)
+
+time1<-as.matrix(time1, ncol=1)
+time2<-as.matrix(time2, ncol=1)
+
+signat<-rbind(time1,time2)
+
+dados$signat<-signat
+
+
+dados$signat<-as.factor(dados$signat)
+boxplot (dados$time_signature , dados$liked,
+        main = "Boxplot para  time_signature e liked ",
+        xlab = "time_signature",
+        ylab = "liked",
+        las = 1,
+        col = c (" Turquoise", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+
+  
+meanval <- by(dados$time_signature , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+
+
+
+
+```
+
+Após a transformação é perceptível que a relação entre as medianas mudou , agora fica evidente que reamente existe diferença entre as duas medianas , vamos testar a associação pelo teste qui-quadrado e verificar se tem alguma diferença em relação ao teste de wilcoxon :
+
+# Executado o teste qui-quadrado para signat(time_signature) e liked
+
+Lembrando que **signat** é a nossa variável **time_signature** convertida em intervalo e transformada em "factor" :
+
+```{r}
+chisq.test(dados$signat,dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeitamos a hipótese nula em favor da hipótese alternativa ,logo ,existe realmete associação significativa entre as variáveis .
+
+### Observação
+
+Como podemos ver tanto o teste de Wilcoxon o Qui-quadrado após a transformação da variável **time_signature** deram que existe associação significativa entre as variáveis com uma pequena diferença no **Pvalor**.
+
+# key(chave) e Liked
+
+### Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+## Plotando o gráfico
+
+```{r}
+
+###### gráfico 
+boxplot (dados$key ~ dados$liked,
+        main = "Boxplot para  key e liked ",
+        xlab = "key",
+        ylab = "liked",
+        las = 1,
+        col = c (" Violet", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$time_signature , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+
+
+
+
+```
+
+A primeira vista pode parecer meio estranho esse gráfico , mas podemos perceber com facilidade que ambas medianas são iguais ,mas será que não há realmente associação entre a variável **key** e **liked(apreciada)** ?
+
+## Mostrando as medianas em uma tabela
+
+```{r}
+ i<- dados%>% group_by(liked) %>%
+  get_summary_stats(key, type="median_iqr")
+
+i%>%
+gt()%>%
+  tab_header(
+    title = md("**Medianas key por grupos**")
+    )
+   
+```
+
+Podemos observar pela tabela das medianas que as medianas são iguais , mas será que realmente não exista associação entre as variáveis ?
+
+## teste de normalidade para as variáveis key e liked
+
+```{r}
+dados$ke<-dados$liked-dados$key
+shapiro.test(dados$ke)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para key e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$key~dados$liked,correct=T)
+```
+
+Como o Pvalor $>$ 0,05, **não** rejeita-se a hipótese nula,logo ,a médiana da diferênça dos valores é realmente igual de zero , nesse caso, **não** existe associação significativa entre as variáveis .
+
+
+
+# tempo e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+## Plotando o gráfico
+
+```{r}
+
+###### gráfico 
+boxplot (dados$tempo ~ dados$liked,
+        main = "Boxplot para  tempo e liked(prefiridas) ",
+        xlab = "tempo",
+        ylab = "liked",
+        las = 1,
+        col = c (" green", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$tempo , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+
+
+
+
+```
+
+Analisando pelo gráfico de boxplot é perceptível que existe uma leve diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **tempo** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes:
+
+## teste de normalidade para as variáveis tempo e  liked
+
+```{r}
+dados$te<-dados$liked-dados$tempo
+shapiro.test(dados$te)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para tempo e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$tempo~dados$liked,correct=T)
+```
+
+Como o Pvalor $<$ 0,05, rejeita-se a hipótese nula,logo ,a médiana da diferênça dos valores é realmente igual de zero , nesse caso, existe associação significativa entre as variáveis .
+
+# liveness(vivacidade) e Liked
+
+## Observação
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se as medianas possuem diferença.
+
+
+## montando a tabela das medianas 
+```{r}
+
+h<-dados%>% group_by(liked) %>%
+  get_summary_stats(liveness, type="common")
+
+
+h %>%
+  gt()%>%
+  tab_header(
+    title = md("**Medianas liveness(vivacidade) por grupos**"))
+```
+
+
+## Plotando o gráfico
+
+```{r}
+
+###### gráfico 
+boxplot (dados$liveness ~ dados$liked,
+        main = "Boxplot para  liveness(vivacidade) e apreciadas ",
+        xlab = "liveness",
+        ylab = "liked",
+        las = 1,
+        col = c (" purple", "steelblue1"),
+        names = c("não gostadas", "gostadas")
+        )
+  
+meanval <- by(dados$liveness , dados$liked, mean)
+points(meanval, col = "white", pch = 8, cex = 1.5)
+
+
+
+
+```
+
+Analisando pelo gráfico de boxplot é perceptível que existe uma leve diferença entre as médianas ,embora haja diferença entre as medianas, não podemos afirmar que **liveness** é um fator de **apreciação(liked)**, para isso , vamos executar os seguintes testes :
+
+## teste de normalidade para as variáveis liveness e liked
+
+```{r}
+dados$le<-dados$liked-dados$liveness
+shapiro.test(dados$le)
+```
+
+Como o Pvalor $<$ 0,05 , não rejeita-se a hipótese nula . Nesse sentido , temos que não existe normalidade entre as variáveis testadas , Logo ,o teste T independente não é o mais indacado , assim vamos utilizar o teste Wilcoxon:
+
+## teste de wilcoxon para liveness e liked
+
+```{r}
+options(scipen = 999)
+
+wilcox.test(dados$liveness~dados$liked,correct=T)
+```
+
+Como o Pvalor $>$ 0,05, **não** rejeita-se a hipótese nula,logo ,a médiana da diferênça dos valores é realmente igual de zero , nesse caso, **não** existe associação significativa entre as variáveis .
+
+# Conclusão
+
+
+Como  vimos durante  as análises executadas, mesmos quando as medianas  das variáveis  possuiam igualdade , em alguns casos, os testes davam significativo ,mostrando que há  relação entre essas variáveis .  Em outros casos, mesmo tendo uma pequena diferença entre as medianas ,os resltudados obitidos nos mostraram que não há associação  entre algumas dessas variáveis , isso nos mostra a importância   de executar os testes não paramétricos  e parametricos .
+
+
+Segundo os testes realizados , foi possível identificar associação entre as variáveis nas quais são fatores de apreciação (liked ), essas variáveis são : (**danceability,instrumentalness,valence ,loudness,speechiness ,duration_ms,time_signature ,tempo**)
+
+Além disso , obtivemos que as seguintes variáveis não possuem associação significativa com **liked**, essas variáveis são : (**mode,liveness,key,energy,acoustiness**).
+
+
+
+# Referências
+
+<http://rstudio-pubs-static.s3.amazonaws.com/408638_6679293d4c7a415eaebe00faa3aea0cb.html>
+
+<https://rstudio-pubs-static.s3.amazonaws.com/508076_7f62a14b367e4f55a154ef166fc4860b.html>
+
+<http://lea.estatistica.ccet.ufrn.br/tutoriais/teste-de-wilcoxon-pareado.html>
+
+<https://bookdown.org/luisfca/docs/qui-quadrado.html>
+
+link para o material da UFPR :
+<http://www.leg.ufpr.br/lib/exe/fetch.php/disciplinas:ce001:wilcoxon_1_.pdf>
